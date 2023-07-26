@@ -1,0 +1,157 @@
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_pw13/api/get_products.dart';
+import 'package:flutter_application_pw13/dialogs/cart_items.dart';
+import 'package:flutter_application_pw13/model/products.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+List<int> list = [];
+
+class ECommerceBloc extends Bloc<ECommerceEvent, ECommerceState> {
+  ECommerceBloc() : super(ECommerceState(list: [])) {
+    on<ECommerceEvent>((event, emit) async {
+      list = [...list, event.element];
+      emit(ECommerceState(list: list));
+    });
+  }
+}
+
+class ECommerceEvent {
+  int element;
+  ECommerceEvent({required this.element});
+}
+
+class ECommerceState {
+  List<int> list;
+  ECommerceState({required this.list});
+}
+
+class BlocExample extends StatelessWidget {
+  BlocExample({super.key});
+  final eCommerceBloc = ECommerceBloc();
+  @override
+  Widget build(context) {
+    List<Products>? products;
+    return BlocBuilder<ECommerceBloc, ECommerceState>(
+      bloc: eCommerceBloc,
+      builder: (context, state) {
+        return Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              FutureBuilder<List<Products>?>(
+                  future: getProducts(),
+                  builder: (context, snapshot) {
+                    products = snapshot.data;
+                    return snapshot.hasData
+                        ? SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                return Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: CarouselSlider(
+                                            options: CarouselOptions(),
+                                            items: products?[index]
+                                                .images!
+                                                .map((item) => Center(
+                                                        child: Image.network(
+                                                      item,
+                                                      fit: BoxFit.cover,
+                                                    )))
+                                                .toList(),
+                                          ),
+                                        ),
+                                        Center(
+                                          child: Text(
+                                            products?[index].title ??
+                                                'Loading Title',
+                                            style:
+                                                const TextStyle(fontSize: 20),
+                                          ),
+                                        ),
+                                        Center(
+                                          child: Text(
+                                            products?[index].description ??
+                                                'Loading Desc',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                  'Discount Percentage: ${products?[index].discountPercentage}'),
+                                              Text(
+                                                  'Rating: ${products?[index].rating}'),
+                                              Text(
+                                                  'Brand: ${products?[index].brand}'),
+                                              Text(
+                                                  'Category: ${products?[index].category}'),
+                                              Text(
+                                                  'Stock: ${products?[index].stock}'),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                      'Price: ${products?[index].price}\$'),
+                                                  ElevatedButton.icon(
+                                                      onPressed: () {
+                                                        eCommerceBloc.add(
+                                                            ECommerceEvent(
+                                                                element:
+                                                                    products![
+                                                                            index]
+                                                                        .id!));
+                                                      },
+                                                      style: ButtonStyle(
+                                                        backgroundColor:
+                                                            MaterialStateProperty
+                                                                .all(Colors
+                                                                    .green),
+                                                      ),
+                                                      icon:
+                                                          const Icon(Icons.add),
+                                                      label: const Text(
+                                                          'Добавить в корзину'))
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                              childCount: products?.length ?? 0,
+                            ),
+                          )
+                        : const SliverToBoxAdapter(
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                  }),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {
+              showItems(context, state.list, products);
+            },
+            icon: const Icon(Icons.shopping_cart),
+            label: Text(state.list.isEmpty ? '' : state.list.length.toString()),
+          ),
+        );
+      },
+    );
+  }
+}
