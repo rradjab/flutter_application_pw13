@@ -1,10 +1,9 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_pw13/main.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_pw13/dialogs/cart_items.dart';
-
-final productsIdList = StateProvider<List<int>>((ref) => []);
+import 'package:flutter_application_pw13/business/riverpod/flutter_riverpod.dart';
 
 //getProducts()
 class RiverpodExample extends ConsumerWidget {

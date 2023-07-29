@@ -1,25 +1,9 @@
-import 'package:mobx/mobx.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_pw13/business/flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_application_pw13/main.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_application_pw13/dialogs/cart_items.dart';
-
-part 'flutter_mobx.g.dart';
-
-// ignore: library_private_types_in_public_api
-class ProductsStore = _ProductsStore with _$ProductsStore;
-
-abstract class _ProductsStore with Store {
-  @observable
-  List<int> productList = [];
-
-  @action
-  void addProduct(int element) {
-    productList = [...productList, element];
-    //productList = ObservableList<int>.of([...productList, element]);
-  }
-}
 
 class MobxExample extends StatelessWidget {
   MobxExample({super.key});

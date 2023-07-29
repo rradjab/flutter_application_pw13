@@ -1,24 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_pw13/main.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_application_pw13/main.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_application_pw13/dialogs/cart_items.dart';
-
-List<int> list = [];
-
-class ECommerceBloc extends Cubit<ECommerceState> {
-  ECommerceBloc() : super(ECommerceState(list: []));
-
-  void addProduct(int element) {
-    list = [...list, element];
-    emit(ECommerceState(list: list));
-  }
-}
-
-class ECommerceState {
-  List<int> list;
-  ECommerceState({required this.list});
-}
+import 'package:flutter_application_pw13/business/bloc_cubit/cubit.dart';
+import 'package:flutter_application_pw13/business/bloc_cubit/cubit_states.dart';
 
 class BlocCubitExample extends StatelessWidget {
   BlocCubitExample({super.key});

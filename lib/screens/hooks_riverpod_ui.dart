@@ -1,62 +1,22 @@
-import 'dart:async';
-
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_pw13/api/get_products.dart';
-import 'package:flutter_application_pw13/dialogs/cart_items.dart';
 import 'package:flutter_application_pw13/main.dart';
-import 'package:flutter_application_pw13/model/products.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_application_pw13/dialogs/cart_items.dart';
+import 'package:flutter_application_pw13/business/hooks_riverpod/hooks_riverpod.dart';
 
-class ECommerceEvent {
-  int element;
-  ECommerceEvent({required this.element});
-}
-
-class ECommerceBloc {
-  List<int> list = [];
-  final _streamController = StreamController<List<int>>();
-
-  Stream<List<int>> get myStream => _streamController.stream;
-
-  void dispose() {
-    _streamController.close();
-  }
-
-  void processEvent(ECommerceEvent action) async {
-    list = [...list, action.element];
-    _streamController.sink.add(list);
-  }
-}
-
-class BlocStreamExample extends StatefulWidget {
-  const BlocStreamExample({super.key});
+class RiverpodHooksExample extends HookConsumerWidget {
+  const RiverpodHooksExample({super.key});
 
   @override
-  State<BlocStreamExample> createState() => _BlocStreamExampleState();
-}
-
-class _BlocStreamExampleState extends State<BlocStreamExample> {
-  late final ECommerceBloc eCommerceBloc;
-  @override
-  void initState() {
-    super.initState();
-    eCommerceBloc = ECommerceBloc();
-  }
-
-  @override
-  void dispose() {
-    eCommerceBloc.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final productIds = ref.watch(productsIdList);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) {
+              (BuildContext context, int index) {
                 return Card(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -107,9 +67,9 @@ class _BlocStreamExampleState extends State<BlocStreamExample> {
                                   Text('Price: ${products?[index].price}\$'),
                                   ElevatedButton.icon(
                                       onPressed: () {
-                                        eCommerceBloc.processEvent(
-                                            ECommerceEvent(
-                                                element: products![index].id!));
+                                        ref
+                                            .read(productsIdList.notifier)
+                                            .addProduct(products![index].id!);
                                       },
                                       style: ButtonStyle(
                                         backgroundColor:
@@ -128,26 +88,18 @@ class _BlocStreamExampleState extends State<BlocStreamExample> {
                   ),
                 );
               },
-              childCount: products?.length ?? 0,
+              childCount: products?.length,
             ),
-          ),
+          )
         ],
       ),
-      floatingActionButton: StreamBuilder<List<int>>(
-          stream: eCommerceBloc.myStream,
-          builder: (context, snapshot) {
-            return FloatingActionButton.extended(
-              onPressed: () {
-                showItems(context, snapshot.data!, products);
-              },
-              icon: const Icon(Icons.shopping_cart),
-              label: snapshot.hasData
-                  ? Text(snapshot.data!.isEmpty
-                      ? ''
-                      : snapshot.data!.length.toString())
-                  : const Text(''),
-            );
-          }),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          showItems(context, productIds, products);
+        },
+        icon: const Icon(Icons.shopping_cart),
+        label: Text(productIds.isEmpty ? '' : productIds.length.toString()),
+      ),
     );
   }
 }

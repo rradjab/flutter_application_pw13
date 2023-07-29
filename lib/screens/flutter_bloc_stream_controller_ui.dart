@@ -1,30 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_pw13/business/bloc_stream_builder/bloc_stream_builder.dart';
+import 'package:flutter_application_pw13/business/bloc_stream_builder/bloc_stream_builder_events.dart';
 import 'package:flutter_application_pw13/main.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_application_pw13/dialogs/cart_items.dart';
 
-final productsIdList =
-    StateNotifierProvider<ProductsIdList, List<int>>((_) => ProductsIdList());
-
-class ProductsIdList extends StateNotifier<List<int>> {
-  ProductsIdList() : super([]);
-
-  void addProduct(int id) => state = [...state, id];
-}
-
-class RiverpodHooksExample extends HookConsumerWidget {
-  const RiverpodHooksExample({super.key});
+class BlocStreamExample extends StatefulWidget {
+  const BlocStreamExample({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final productIds = ref.watch(productsIdList);
+  State<BlocStreamExample> createState() => _BlocStreamExampleState();
+}
+
+class _BlocStreamExampleState extends State<BlocStreamExample> {
+  late final ECommerceBloc eCommerceBloc;
+  @override
+  void initState() {
+    super.initState();
+    eCommerceBloc = ECommerceBloc();
+  }
+
+  @override
+  void dispose() {
+    eCommerceBloc.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (context, index) {
                 return Card(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -75,9 +84,9 @@ class RiverpodHooksExample extends HookConsumerWidget {
                                   Text('Price: ${products?[index].price}\$'),
                                   ElevatedButton.icon(
                                       onPressed: () {
-                                        ref
-                                            .read(productsIdList.notifier)
-                                            .addProduct(products![index].id!);
+                                        eCommerceBloc.processEvent(
+                                            ECommerceEvent(
+                                                element: products![index].id!));
                                       },
                                       style: ButtonStyle(
                                         backgroundColor:
@@ -96,18 +105,26 @@ class RiverpodHooksExample extends HookConsumerWidget {
                   ),
                 );
               },
-              childCount: products?.length,
+              childCount: products?.length ?? 0,
             ),
-          )
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          showItems(context, productIds, products);
-        },
-        icon: const Icon(Icons.shopping_cart),
-        label: Text(productIds.isEmpty ? '' : productIds.length.toString()),
-      ),
+      floatingActionButton: StreamBuilder<List<int>>(
+          stream: eCommerceBloc.myStream,
+          builder: (context, snapshot) {
+            return FloatingActionButton.extended(
+              onPressed: () {
+                showItems(context, snapshot.data!, products);
+              },
+              icon: const Icon(Icons.shopping_cart),
+              label: snapshot.hasData
+                  ? Text(snapshot.data!.isEmpty
+                      ? ''
+                      : snapshot.data!.length.toString())
+                  : const Text(''),
+            );
+          }),
     );
   }
 }

@@ -4,36 +4,14 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_application_pw13/main.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_application_pw13/dialogs/cart_items.dart';
-
-class AppState {
-  final List<int> productsList;
-
-  AppState(this.productsList);
-}
-
-enum ActionType { addProduct }
-
-class Action {
-  final ActionType type;
-  final int element;
-  Action(this.type, {required this.element});
-}
-
-AppState reducer(AppState state, dynamic action) {
-  if (action is Action) {
-    switch (action.type) {
-      case ActionType.addProduct:
-        return AppState([...state.productsList, action.element]);
-    }
-  }
-  return state;
-}
+import 'package:flutter_application_pw13/business/flutter_redux/flutter_redux.dart'
+    as rdx;
 
 class ReduxExample extends StatelessWidget {
   ReduxExample({super.key});
-  final Store<AppState> store = Store<AppState>(
-    reducer,
-    initialState: AppState([]),
+  final Store<rdx.AppState> store = Store<rdx.AppState>(
+    rdx.reducer,
+    initialState: rdx.AppState([]),
   );
 
   @override
@@ -94,10 +72,10 @@ class ReduxExample extends StatelessWidget {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text('Price: ${products?[index].price}\$'),
-                                    StoreConnector<AppState, VoidCallback>(
+                                    StoreConnector<rdx.AppState, VoidCallback>(
                                       converter: (store) {
-                                        return () => store.dispatch(Action(
-                                            ActionType.addProduct,
+                                        return () => store.dispatch(rdx.Action(
+                                            rdx.ActionType.addProduct,
                                             element: products![index].id!));
                                       },
                                       builder: (context, callback) {
@@ -129,7 +107,7 @@ class ReduxExample extends StatelessWidget {
             ),
           ],
         ),
-        floatingActionButton: StoreConnector<AppState, List<int>>(
+        floatingActionButton: StoreConnector<rdx.AppState, List<int>>(
           converter: (store) => store.state.productsList,
           builder: (context, productsList) {
             return FloatingActionButton.extended(
