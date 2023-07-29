@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_pw13/lists/state_managers_list.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_pw13/model/products.dart';
+import 'package:flutter_application_pw13/api/get_products.dart';
+import 'package:flutter_application_pw13/lists/state_managers_list.dart';
+
+List<Products>? products;
 
 void main() {
   runApp(
@@ -20,8 +24,14 @@ class _MyAppState extends State<MyApp> {
   Widget currentWidget = approaches.values.elementAt(0);
   String appBarTitle = approaches.keys.elementAt(0);
 
+  void getProductList() async {
+    products = await getProducts();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    getProductList();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
@@ -69,7 +79,11 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         ),
-        body: currentWidget,
+        body: products != null
+            ? currentWidget
+            : const Center(
+                child: CircularProgressIndicator(),
+              ),
       ),
     );
   }

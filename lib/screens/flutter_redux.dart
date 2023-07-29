@@ -1,10 +1,9 @@
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_application_pw13/api/get_products.dart';
-import 'package:flutter_application_pw13/dialogs/cart_items.dart';
-import 'package:flutter_application_pw13/model/products.dart';
-import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_application_pw13/main.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_application_pw13/dialogs/cart_items.dart';
 
 class AppState {
   final List<int> productsList;
@@ -39,122 +38,95 @@ class ReduxExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Products>? products;
     return StoreProvider(
       store: store,
       child: Scaffold(
         body: CustomScrollView(
           slivers: [
-            FutureBuilder<List<Products>?>(
-                future: getProducts(),
-                builder: (context, snapshot) {
-                  products = snapshot.data;
-                  return snapshot.hasData
-                      ? SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              return Card(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: CarouselSlider(
-                                          options: CarouselOptions(),
-                                          items: products?[index]
-                                              .images!
-                                              .map((item) => Center(
-                                                      child: Image.network(
-                                                    item,
-                                                    fit: BoxFit.cover,
-                                                  )))
-                                              .toList(),
-                                        ),
-                                      ),
-                                      Center(
-                                        child: Text(
-                                          products?[index].title ??
-                                              'Loading Title',
-                                          style: const TextStyle(fontSize: 20),
-                                        ),
-                                      ),
-                                      Center(
-                                        child: Text(
-                                          products?[index].description ??
-                                              'Loading Desc',
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                                'Discount Percentage: ${products?[index].discountPercentage}'),
-                                            Text(
-                                                'Rating: ${products?[index].rating}'),
-                                            Text(
-                                                'Brand: ${products?[index].brand}'),
-                                            Text(
-                                                'Category: ${products?[index].category}'),
-                                            Text(
-                                                'Stock: ${products?[index].stock}'),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                    'Price: ${products?[index].price}\$'),
-                                                StoreConnector<AppState,
-                                                    VoidCallback>(
-                                                  converter: (store) {
-                                                    return () => store.dispatch(
-                                                        Action(
-                                                            ActionType
-                                                                .addProduct,
-                                                            element:
-                                                                products![index]
-                                                                    .id!));
-                                                  },
-                                                  builder: (context, callback) {
-                                                    return ElevatedButton.icon(
-                                                      onPressed: callback,
-                                                      style: ButtonStyle(
-                                                        backgroundColor:
-                                                            MaterialStateProperty
-                                                                .all(Colors
-                                                                    .green),
-                                                      ),
-                                                      icon:
-                                                          const Icon(Icons.add),
-                                                      label: const Text(
-                                                          'Добавить в корзину'),
-                                                    );
-                                                  },
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            childCount: products?.length ?? 0,
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CarouselSlider(
+                              options: CarouselOptions(),
+                              items: products?[index]
+                                  .images!
+                                  .map((item) => Center(
+                                          child: Image.network(
+                                        item,
+                                        fit: BoxFit.cover,
+                                      )))
+                                  .toList(),
+                            ),
                           ),
-                        )
-                      : const SliverToBoxAdapter(
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                }),
+                          Center(
+                            child: Text(
+                              products?[index].title ?? 'Loading Title',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ),
+                          Center(
+                            child: Text(
+                              products?[index].description ?? 'Loading Desc',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    'Discount Percentage: ${products?[index].discountPercentage}'),
+                                Text('Rating: ${products?[index].rating}'),
+                                Text('Brand: ${products?[index].brand}'),
+                                Text('Category: ${products?[index].category}'),
+                                Text('Stock: ${products?[index].stock}'),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Price: ${products?[index].price}\$'),
+                                    StoreConnector<AppState, VoidCallback>(
+                                      converter: (store) {
+                                        return () => store.dispatch(Action(
+                                            ActionType.addProduct,
+                                            element: products![index].id!));
+                                      },
+                                      builder: (context, callback) {
+                                        return ElevatedButton.icon(
+                                          onPressed: callback,
+                                          style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.all(
+                                                    Colors.green),
+                                          ),
+                                          icon: const Icon(Icons.add),
+                                          label:
+                                              const Text('Добавить в корзину'),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                childCount: products?.length ?? 0,
+              ),
+            ),
           ],
         ),
         floatingActionButton: StoreConnector<AppState, List<int>>(
